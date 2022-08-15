@@ -1,5 +1,6 @@
 package Algorithm
 
+import sun.rmi.runtime.Log
 import java.io.BufferedReader
 import java.io.FileReader
 import java.io.IOException
@@ -18,6 +19,8 @@ class Algorithm(private val filePath: String) {
     }
 
     private fun readFileUsingBufferedReader(filePath: String) {
+        println("readFileUsingBufferedReader")
+
         try {
             BufferedReader(FileReader(filePath)).use { br ->
                 var line: String?
@@ -52,6 +55,7 @@ class Algorithm(private val filePath: String) {
 
 
     private fun makeInitialMatrix() {
+        println("makeInitialMatrix")
 
         fun initialMatrixValue(i: Int) = Pair(InternalUtility(0),CrossUtility(0))
 
@@ -79,6 +83,7 @@ class Algorithm(private val filePath: String) {
     }
 
     private fun  calculateEachMatrixColumnSum(){
+        println("calculateEachMatrixColumnSum")
 
         var sum = 0
         for (i in 0 until initialMatrixColumnCount){
@@ -92,6 +97,8 @@ class Algorithm(private val filePath: String) {
     }
 
     private fun reorderInitialMatrix() {
+        println("reorderInitialMatrix")
+
         val list = initialMatrix[dataModelList.size].map { it.first.value }.toList()
         val orderedList = list.sorted()
 
@@ -109,6 +116,8 @@ class Algorithm(private val filePath: String) {
 
 
     private fun swapMatrixColumn(ci: Int, cj: Int){
+        println("swapMatrixColumn")
+
         for (i in 1 ..  dataModelList.size){
             val tmpPair = initialMatrix[i][ci]
             initialMatrix[i][ci] = initialMatrix[i][cj]
