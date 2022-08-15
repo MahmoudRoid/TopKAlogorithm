@@ -84,24 +84,25 @@ class Algorithm(private val filePath: String) {
         for (i in 0 until initialMatrixColumnCount){
             for (j in 1 until initialMatrix.size){
                 sum += initialMatrix[j][i].second.value
-                initialMatrix[j][i] = Pair(InternalUtility(sum),CrossUtility(0))
+               /* initialMatrix[j][i] = Pair(InternalUtility(sum),CrossUtility(0))*/
             }
+            initialMatrix[ initialMatrix.size - 1 ][i] = Pair(InternalUtility(sum),CrossUtility(0))
             sum = 0
         }
 
     }
 
     private fun reorderInitialMatrix() {
-        val list = initialMatrix[dataModelList.size].map { it.first.value }.toList()
-        val orderedList = list.sorted()
+        val list = initialMatrix[dataModelList.size + 1].map { it.first.value }.toMutableList()
+        val orderedList = list.sorted().toMutableList()
 
-        swapMatrixColumn(0,1)
-
-
-     /*   for( i in list.indices){
-
-        }*/
-
+        var tmp = 0
+        orderedList.forEachIndexed { index, orderedItem ->
+            val oldIndex = list.indexOf(orderedItem)
+            if (oldIndex >= tmp)
+                swapMatrixColumn(tmp, oldIndex)
+            tmp++
+        }
 
         println()
     }
@@ -109,13 +110,12 @@ class Algorithm(private val filePath: String) {
 
 
     private fun swapMatrixColumn(ci: Int, cj: Int){
-        for (i in 1 ..  dataModelList.size){
+        for (i in 1 ..  dataModelList.size + 1){
             val tmpPair = initialMatrix[i][ci]
             initialMatrix[i][ci] = initialMatrix[i][cj]
             initialMatrix[i][cj] = tmpPair
 
         }
-        println()
     }
 
 }
