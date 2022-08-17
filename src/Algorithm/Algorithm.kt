@@ -9,12 +9,16 @@ class Algorithm(private val filePath: String) {
     private val dataModelList = mutableListOf<DataModel>()
     private lateinit var initialMatrix: Array<Array<Pair<InternalUtility, CrossUtility>>>
     private var initialMatrixColumnCount = 0
+    private val mainMatrix by lazy {
+        Array(initialMatrixColumnCount) { IntArray(initialMatrixColumnCount) }
+    }
 
     init {
         readFileUsingBufferedReader(filePath)
         makeInitialMatrix()
-        calculateEachMatrixColumnSum()
+        calculateEachInitialMatrixColumnSum()
         reorderInitialMatrix()
+        createMainMatrix()
     }
 
     private fun readFileUsingBufferedReader(filePath: String) {
@@ -50,11 +54,9 @@ class Algorithm(private val filePath: String) {
         }
     }
 
-
     private fun makeInitialMatrix() {
 
         fun initialMatrixValue(i: Int) = Pair(InternalUtility(0),CrossUtility(0))
-
 
         if (dataModelList.isEmpty()){
             println("data model list is empty")
@@ -78,7 +80,7 @@ class Algorithm(private val filePath: String) {
 
     }
 
-    private fun  calculateEachMatrixColumnSum(){
+    private fun  calculateEachInitialMatrixColumnSum(){
 
         var sum = 0
         for (i in 0 until initialMatrixColumnCount){
@@ -110,8 +112,6 @@ class Algorithm(private val filePath: String) {
 
     }
 
-
-
     private fun swapMatrixColumn(ci: Int, cj: Int){
         for (i in 0 ..  dataModelList.size + 1){
             val tmpPair = initialMatrix[i][ci]
@@ -119,6 +119,33 @@ class Algorithm(private val filePath: String) {
             initialMatrix[i][cj] = tmpPair
 
         }
+    }
+
+    private fun createMainMatrix(){
+
+        // create hypotenuse of matrix
+        for (i in mainMatrix.indices)
+            for (j in mainMatrix.indices)
+                if ( i == j )
+                    mainMatrix[i][j] = initialMatrix[initialMatrix.size-1][i].first.value
+
+        // create rest of matrix
+        for (i in mainMatrix.indices)
+            for (j in i+1 until mainMatrix.size)
+                    mainMatrix[i][j] = calculateMainMatrixCell(i,j)
+
+        println()
+    }
+
+    private fun calculateMainMatrixCell(ci: Int, cj: Int): Int{
+        var sum = 0
+
+        for (i in 1 until initialMatrix.size -1){
+                if (initialMatrix[i][ci].second.value != 0 && initialMatrix[i][cj].second.value != 0)
+                    sum += initialMatrix[i][ci].second.value + initialMatrix[i][cj].second.value
+        }
+
+        return sum
     }
 
 }
