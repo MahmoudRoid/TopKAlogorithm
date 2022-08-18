@@ -6,6 +6,7 @@ import java.io.IOException
 
 class Algorithm(private val filePath: String) {
 
+    private val k = 5
     private val dataModelList = mutableListOf<DataModel>()
     private lateinit var initialMatrix: Array<Array<Pair<InternalUtility, CrossUtility>>>
     private var initialMatrixColumnCount = 0
@@ -14,11 +15,17 @@ class Algorithm(private val filePath: String) {
     }
 
     init {
+        val startTime = System.currentTimeMillis()
+
         readFileUsingBufferedReader(filePath)
         makeInitialMatrix()
         calculateEachInitialMatrixColumnSum()
         reorderInitialMatrix()
         createMainMatrix()
+        calculateTopK()
+
+        println()
+        println("time taken is:  ${System.currentTimeMillis() - startTime} ms")
     }
 
     private fun readFileUsingBufferedReader(filePath: String) {
@@ -123,6 +130,17 @@ class Algorithm(private val filePath: String) {
 
     private fun createMainMatrix(){
 
+         fun calculateMainMatrixCell(ci: Int, cj: Int): Int{
+            var sum = 0
+
+            for (i in 1 until initialMatrix.size -1){
+                if (initialMatrix[i][ci].second.value != 0 && initialMatrix[i][cj].second.value != 0)
+                    sum += initialMatrix[i][ci].second.value + initialMatrix[i][cj].second.value
+            }
+
+            return sum
+        }
+
         // create hypotenuse of matrix
         for (i in mainMatrix.indices)
             for (j in mainMatrix.indices)
@@ -133,19 +151,58 @@ class Algorithm(private val filePath: String) {
         for (i in mainMatrix.indices)
             for (j in i+1 until mainMatrix.size)
                     mainMatrix[i][j] = calculateMainMatrixCell(i,j)
-
-        println()
     }
 
-    private fun calculateMainMatrixCell(ci: Int, cj: Int): Int{
-        var sum = 0
-
-        for (i in 1 until initialMatrix.size -1){
-                if (initialMatrix[i][ci].second.value != 0 && initialMatrix[i][cj].second.value != 0)
-                    sum += initialMatrix[i][ci].second.value + initialMatrix[i][cj].second.value
+    private fun calculateTopK() {
+        val maxAvailableK = (mainMatrix.size * mainMatrix.size) - (( (mainMatrix.size * mainMatrix.size) - mainMatrix.size ) / 2)
+        if (k > maxAvailableK){
+            println("Specify lower K !!!")
+            return
         }
+        else{
 
-        return sum
+            val topKArray = IntArray(k){-1}
+            var topKArrayIndex = 0
+            var min_j = 0
+            var max_i = mainMatrix.size - 1
+
+            do {
+
+                var j = min_j
+                for (i in 0 .. max_i){
+
+                    // fill topK array if it has not completed yet
+                    if (topKArrayIndex < k){
+
+                        topKArray[topKArrayIndex] = mainMatrix[i][j]
+                        topKArrayIndex++
+
+                    }
+                    else {
+
+                        // compare main matrix item with the lowest item in topK array
+                        if ( mainMatrix[i][j] > topKArray[0] ){
+
+                            topKArray[0] = mainMatrix[i][j]
+
+                            // sort topk array
+                            topKArray.sort()
+                        }
+
+
+                    }
+
+                    j++
+                }
+
+                min_j++
+                max_i--
+
+            }while (min_j <= mainMatrix.size - 1  && max_i >= 0)
+
+            print("Top $k is:  ")
+            topKArray.forEach { print("$it ") }
+        }
     }
 
 }
