@@ -6,7 +6,7 @@ import java.io.IOException
 
 class Algorithm(private val filePath: String) {
 
-    private val k = 5
+    private val k = 8
     private val dataModelList = mutableListOf<DataModel>()
     private lateinit var initialMatrix: Array<Array<Pair<InternalUtility, CrossUtility>>>
     private var initialMatrixColumnCount = 0
