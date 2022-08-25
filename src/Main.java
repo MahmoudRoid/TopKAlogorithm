@@ -6,7 +6,7 @@ import java.net.URL;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        new Algorithm( fileToPath( "test_hasani.txt" ) );
+        new Algorithm( fileToPath( "test_1.txt" ) , 3 );
     }
 
     public static String fileToPath(String filename) throws UnsupportedEncodingException {

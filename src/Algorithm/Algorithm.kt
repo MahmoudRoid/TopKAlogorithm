@@ -4,9 +4,8 @@ import java.io.BufferedReader
 import java.io.FileReader
 import java.io.IOException
 
-class Algorithm(private val filePath: String) {
+class Algorithm(private val filePath: String, private val k: Int) {
 
-    private val k = 8
     private val dataModelList = mutableListOf<DataModel>()
     private lateinit var initialMatrix: Array<Array<Pair<InternalUtility, CrossUtility>>>
     private var initialMatrixColumnCount = 0
@@ -21,10 +20,11 @@ class Algorithm(private val filePath: String) {
         makeInitialMatrix()
         calculateEachInitialMatrixColumnSum()
         reorderInitialMatrix()
-        createMainMatrix()
-        calculateTopK()
 
-        println()
+
+/*        createMainMatrix()
+        calculateTopK()*/
+
         println("time taken is:  ${System.currentTimeMillis() - startTime} ms")
     }
 
@@ -108,13 +108,11 @@ class Algorithm(private val filePath: String) {
         val orderedList = list.sortedBy { it.first.value }
 
         for (i in list.indices){
-
             val elementIndexInTmpList = tmpList.indexOf(list[i])
             val elementIndexInOrderedList = orderedList.indexOf(list[i])
 
             if (elementIndexInTmpList != elementIndexInOrderedList)
                 swapMatrixColumn(elementIndexInTmpList, elementIndexInOrderedList)
-
         }
 
     }
@@ -151,6 +149,8 @@ class Algorithm(private val filePath: String) {
         for (i in mainMatrix.indices)
             for (j in i+1 until mainMatrix.size)
                     mainMatrix[i][j] = calculateMainMatrixCell(i,j)
+
+        println()
     }
 
     private fun calculateTopK() {
