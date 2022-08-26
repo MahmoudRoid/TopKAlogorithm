@@ -20,10 +20,8 @@ class Algorithm(private val filePath: String, private val k: Int) {
         makeInitialMatrix()
         calculateEachInitialMatrixColumnSum()
         reorderInitialMatrix()
-
-
-/*        createMainMatrix()
-        calculateTopK()*/
+        createMainMatrix()
+        calculateTopK()
 
         println("time taken is:  ${System.currentTimeMillis() - startTime} ms")
     }
@@ -93,7 +91,7 @@ class Algorithm(private val filePath: String, private val k: Int) {
         for (i in 0 until initialMatrixColumnCount){
             for (j in 1 until initialMatrix.size){
                 sum += initialMatrix[j][i].second.value
-               /* initialMatrix[j][i] = Pair(InternalUtility(sum),CrossUtility(0))*/
+                /* initialMatrix[j][i] = Pair(InternalUtility(sum),CrossUtility(0))*/
             }
             initialMatrix[ initialMatrix.size - 1 ][i] = Pair(InternalUtility(sum),CrossUtility(i))
             sum = 0
@@ -128,81 +126,56 @@ class Algorithm(private val filePath: String, private val k: Int) {
 
     private fun createMainMatrix(){
 
-         fun calculateMainMatrixCell(ci: Int, cj: Int): Int{
+        fun calculateSumOfGivenColumnIndexes(list: List<Int>): Int {
             var sum = 0
+            first@ for (i in 1 until initialMatrix.size -1){
+                var tmp = 0
+                second@ for (j in list.indices){
+                    if (initialMatrix[i][list[j]].second.value != 0)
+                        tmp += initialMatrix[i][list[j]].second.value
+                    else{
+                        tmp = 0
+                        break@second
+                    }
+                }
+                sum += tmp
+            }
+            return sum
+        }
 
-            for (i in 1 until initialMatrix.size -1){
-                if (initialMatrix[i][ci].second.value != 0 && initialMatrix[i][cj].second.value != 0)
-                    sum += initialMatrix[i][ci].second.value + initialMatrix[i][cj].second.value
+        fun getRow(rowIndex: Int){
+
+            for (i in rowIndex + 1 until mainMatrix.size){
+                val tmpList = mutableListOf<Int>()
+                val listOfList: List<List<Int>> = Util.getIndexList(rowIndex,i)
+                for (element in listOfList)
+                    tmpList.add( calculateSumOfGivenColumnIndexes(element) )
+                mainMatrix[rowIndex][i] = tmpList.maxOrNull() ?: 0
             }
 
-            return sum
         }
 
         // create hypotenuse of matrix
         for (i in mainMatrix.indices)
-            for (j in mainMatrix.indices)
-                if ( i == j )
-                    mainMatrix[i][j] = initialMatrix[initialMatrix.size-1][i].first.value
+            mainMatrix[i][i] = initialMatrix[initialMatrix.size-1][i].first.value
 
         // create rest of matrix
-        for (i in mainMatrix.indices)
-            for (j in i+1 until mainMatrix.size)
-                    mainMatrix[i][j] = calculateMainMatrixCell(i,j)
+        for (i in 0 until mainMatrix.size -1)
+            getRow(i)
 
-        println()
     }
 
     private fun calculateTopK() {
-        val maxAvailableK = (mainMatrix.size * mainMatrix.size) - (( (mainMatrix.size * mainMatrix.size) - mainMatrix.size ) / 2)
-        if (k > maxAvailableK){
-            println("Specify lower K !!!")
-            return
-        }
-        else{
 
-            val topKArray = IntArray(k){-1}
-            var topKArrayIndex = 0
-            var min_j = 0
-            var max_i = mainMatrix.size - 1
+        val finalList = mutableListOf<Int>()
 
-            do {
+        for (i in mainMatrix.indices)
+            for (j in i until mainMatrix.size)
+                finalList.add(mainMatrix[i][j])
 
-                var j = min_j
-                for (i in 0 .. max_i){
+        finalList.sort()
 
-                    // fill topK array if it has not completed yet
-                    if (topKArrayIndex < k){
-
-                        topKArray[topKArrayIndex] = mainMatrix[i][j]
-                        topKArrayIndex++
-
-                    }
-                    else {
-
-                        // compare main matrix item with the lowest item in topK array
-                        if ( mainMatrix[i][j] > topKArray[0] ){
-
-                            topKArray[0] = mainMatrix[i][j]
-
-                            // sort topk array
-                            topKArray.sort()
-                        }
-
-
-                    }
-
-                    j++
-                }
-
-                min_j++
-                max_i--
-
-            }while (min_j <= mainMatrix.size - 1  && max_i >= 0)
-
-            print("Top $k is:  ")
-            topKArray.forEach { print("$it ") }
-        }
+        println( finalList.takeLast(k) )
     }
 
 }
