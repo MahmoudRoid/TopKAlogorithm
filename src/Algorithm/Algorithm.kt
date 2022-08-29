@@ -20,10 +20,9 @@ class Algorithm(private val filePath: String, private val k: Int) {
         makeInitialMatrix()
         calculateEachInitialMatrixColumnSum()
         reorderInitialMatrix()
-        createMainMatrix()
-        calculateTopK()
+        createPathSumList()
 
-        println("time taken is:  ${System.currentTimeMillis() - startTime} ms")
+        println("\n\ntime taken is:  ${System.currentTimeMillis() - startTime} ms")
     }
 
     private fun readFileUsingBufferedReader(filePath: String) {
@@ -124,7 +123,9 @@ class Algorithm(private val filePath: String, private val k: Int) {
         }
     }
 
-    private fun createMainMatrix(){
+    private fun createPathSumList(){
+
+        val finalList = mutableListOf<Pair<String, Int>>()
 
         fun calculateSumOfGivenColumnIndexes(list: List<Int>): Int {
             var sum = 0
@@ -143,39 +144,52 @@ class Algorithm(private val filePath: String, private val k: Int) {
             return sum
         }
 
-        fun getRow(rowIndex: Int){
-
-            for (i in rowIndex + 1 until mainMatrix.size){
-                val tmpList = mutableListOf<Int>()
-                val listOfList: List<List<Int>> = Util.getIndexList(rowIndex,i)
-                for (element in listOfList)
-                    tmpList.add( calculateSumOfGivenColumnIndexes(element) )
-                mainMatrix[rowIndex][i] = tmpList.maxOrNull() ?: 0
+        fun addInitialMatrixRowCountToFinalList(){
+            for (i in 0 until initialMatrixColumnCount){
+                finalList.add(
+                    Pair(
+                        initialMatrix[0][i].first.value.toString(),
+                        initialMatrix[initialMatrix.size -1][i].first.value
+                    )
+                )
             }
-
         }
 
-        // create hypotenuse of matrix
-        for (i in mainMatrix.indices)
-            mainMatrix[i][i] = initialMatrix[initialMatrix.size-1][i].first.value
+        //sample ==> first row
+        val min_n = 2
+        val max_n = initialMatrixColumnCount - 1
+        var j = 0
 
-        // create rest of matrix
-        for (i in 0 until mainMatrix.size -1)
-            getRow(i)
+        for (n in min_n..max_n)
+        {
+            while ( (j + n - 1) < initialMatrixColumnCount ){
+                val indexList: List<Int> = (j until j + n).toList()
+                val sum = calculateSumOfGivenColumnIndexes(indexList)
+                finalList.add(Pair( indexList.toString(), sum ))
+                j++
+            }
+            j = 0
+        }
 
+        addInitialMatrixRowCountToFinalList()
+
+        calculateTopK(finalList)
     }
 
-    private fun calculateTopK() {
+    private fun calculateTopK(list: MutableList<Pair<String, Int>>) {
 
-        val finalList = mutableListOf<Int>()
+        if (k > list.size)
+            println("choose lower K please")
 
-        for (i in mainMatrix.indices)
-            for (j in i until mainMatrix.size)
-                finalList.add(mainMatrix[i][j])
+        list.sortedBy { it.second }.also {
+            it.takeLast(k).forEach {
+                pair ->
+                println( pair.first + " ==> " + pair.second )
+            }
+        }
 
-        finalList.sort()
 
-        println( finalList.takeLast(k) )
+
     }
 
 }
